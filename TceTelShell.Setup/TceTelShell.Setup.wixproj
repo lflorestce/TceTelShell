@@ -1,0 +1,7 @@
+﻿<Project Sdk="WixToolset.Sdk/6.0.2">
+  <PropertyGroup>
+    <OutputName>TceTelShell.Setup</OutputName>
+    <InstallerPlatform>x64</InstallerPlatform>
+    <DefineConstants>PublishDir=..\TceTelShell\bin\Release\net8.0-windows\win-x64\publish</DefineConstants>
+  </PropertyGroup>
+</Project>

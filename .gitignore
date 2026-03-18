@@ -1,0 +1,22 @@
+﻿# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# .NET build output
+**/bin/
+**/obj/
+
+# Publish output
+**/publish/
+
+# WiX output
+**/*.wixpdb
+**/*.msi
+**/*.cab
+
+# OS noise
+Thumbs.db
+.DS_Store

@@ -1,0 +1,80 @@
+﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package
+    Id="TCECompany.TceTelShell"
+    Name="TCE Tel Shell"
+    Manufacturer="TCE Company"
+    Version="1.0.0"
+    Language="1033"
+    Scope="perMachine">
+
+    <StandardDirectory Id="ProgramFiles6432Folder">
+      <Directory Id="CompanyFolder" Name="TCE Company">
+        <Directory Id="INSTALLFOLDER" Name="TCE Tel Shell" />
+      </Directory>
+    </StandardDirectory>
+
+    <Component Id="MainAppAndProtocol" Directory="INSTALLFOLDER">
+      <File
+        Id="TelShellExe"
+        Source="$(var.PublishDir)\TceTelShell.exe"
+        KeyPath="yes"
+        Checksum="yes" />
+
+      <RegistryValue
+        Root="HKLM"
+        Key="SOFTWARE\Classes\TCE.Tel"
+        Type="string"
+        Value="TCE Tel Protocol" />
+      <RegistryValue
+        Root="HKLM"
+        Key="SOFTWARE\Classes\TCE.Tel"
+        Name="URL Protocol"
+        Type="string"
+        Value="" />
+      <RegistryValue
+        Root="HKLM"
+        Key="SOFTWARE\Classes\TCE.Tel\DefaultIcon"
+        Type="string"
+        Value="[#TelShellExe],0" />
+      <RegistryValue
+        Root="HKLM"
+        Key="SOFTWARE\Classes\TCE.Tel\shell\open\command"
+        Type="string"
+        Value="&quot;[#TelShellExe]&quot; &quot;%1&quot;" />
+    </Component>
+
+    <Component Id="DefaultProgramsRegistration" Directory="INSTALLFOLDER">
+      <RegistryValue
+        Root="HKLM"
+        Key="SOFTWARE\TCE\TelShell\Capabilities"
+        Name="ApplicationName"
+        Type="string"
+        Value="TCE Tel Shell"
+        KeyPath="yes" />
+      <RegistryValue
+        Root="HKLM"
+        Key="SOFTWARE\TCE\TelShell\Capabilities"
+        Name="ApplicationDescription"
+        Type="string"
+        Value="Routes tel: links to the TCE WebRTC dialer." />
+      <RegistryValue
+        Root="HKLM"
+        Key="SOFTWARE\TCE\TelShell\Capabilities\UrlAssociations"
+        Name="tel"
+        Type="string"
+        Value="TCE.Tel" />
+      <RegistryValue
+        Root="HKLM"
+        Key="SOFTWARE\RegisteredApplications"
+        Name="TCE Tel Shell"
+        Type="string"
+        Value="SOFTWARE\TCE\TelShell\Capabilities" />
+    </Component>
+
+    <Feature Id="MainFeature" Title="TCE Tel Shell" Level="1">
+      <ComponentRef Id="MainAppAndProtocol" />
+      <ComponentRef Id="DefaultProgramsRegistration" />
+    </Feature>
+
+  </Package>
+</Wix>
