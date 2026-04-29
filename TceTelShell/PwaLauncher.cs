@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 
 namespace TceTelShell;
@@ -8,6 +8,9 @@ public static class PwaLauncher
     public static void OpenDialUrl(string e164Number)
     {
         var settings = SettingsManager.Load();
+
+        if (settings.UseEmbeddedDialer)
+            throw new InvalidOperationException("Embedded dialer mode is enabled. Use the desktop shell to launch calls.");
 
         if (string.IsNullOrWhiteSpace(settings.BaseUrl))
             throw new InvalidOperationException("Base URL is not configured.");

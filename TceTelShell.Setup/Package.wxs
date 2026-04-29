@@ -1,80 +1,77 @@
-﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
   <Package
-    Id="TCECompany.TceTelShell"
-    Name="TCE Tel Shell"
-    Manufacturer="TCE Company"
-    Version="1.0.0"
-    Language="1033"
-    Scope="perMachine">
+      Name="TCE Tel Shell"
+      Manufacturer="TCE Company"
+      Version="1.0.0.0"
+      UpgradeCode="11111111-2222-3333-4444-555555555555"
+      Scope="perMachine">
 
-    <StandardDirectory Id="ProgramFiles6432Folder">
-      <Directory Id="CompanyFolder" Name="TCE Company">
-        <Directory Id="INSTALLFOLDER" Name="TCE Tel Shell" />
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="TCE Tel Shell">
+        <Directory Id="WWWROOTFOLDER" Name="wwwroot" />
       </Directory>
     </StandardDirectory>
 
-    <Component Id="MainAppAndProtocol" Directory="INSTALLFOLDER">
-      <File
-        Id="TelShellExe"
-        Source="$(var.PublishDir)\TceTelShell.exe"
-        KeyPath="yes"
-        Checksum="yes" />
-
-      <RegistryValue
-        Root="HKLM"
-        Key="SOFTWARE\Classes\TCE.Tel"
-        Type="string"
-        Value="TCE Tel Protocol" />
-      <RegistryValue
-        Root="HKLM"
-        Key="SOFTWARE\Classes\TCE.Tel"
-        Name="URL Protocol"
-        Type="string"
-        Value="" />
-      <RegistryValue
-        Root="HKLM"
-        Key="SOFTWARE\Classes\TCE.Tel\DefaultIcon"
-        Type="string"
-        Value="[#TelShellExe],0" />
-      <RegistryValue
-        Root="HKLM"
-        Key="SOFTWARE\Classes\TCE.Tel\shell\open\command"
-        Type="string"
-        Value="&quot;[#TelShellExe]&quot; &quot;%1&quot;" />
-    </Component>
-
-    <Component Id="DefaultProgramsRegistration" Directory="INSTALLFOLDER">
-      <RegistryValue
-        Root="HKLM"
-        Key="SOFTWARE\TCE\TelShell\Capabilities"
-        Name="ApplicationName"
-        Type="string"
-        Value="TCE Tel Shell"
-        KeyPath="yes" />
-      <RegistryValue
-        Root="HKLM"
-        Key="SOFTWARE\TCE\TelShell\Capabilities"
-        Name="ApplicationDescription"
-        Type="string"
-        Value="Routes tel: links to the TCE WebRTC dialer." />
-      <RegistryValue
-        Root="HKLM"
-        Key="SOFTWARE\TCE\TelShell\Capabilities\UrlAssociations"
-        Name="tel"
-        Type="string"
-        Value="TCE.Tel" />
-      <RegistryValue
-        Root="HKLM"
-        Key="SOFTWARE\RegisteredApplications"
-        Name="TCE Tel Shell"
-        Type="string"
-        Value="SOFTWARE\TCE\TelShell\Capabilities" />
-    </Component>
-
     <Feature Id="MainFeature" Title="TCE Tel Shell" Level="1">
-      <ComponentRef Id="MainAppAndProtocol" />
-      <ComponentRef Id="DefaultProgramsRegistration" />
+      <ComponentRef Id="MainExecutable" />
+      <ComponentRef Id="WebView2LoaderComponent" />
+      <ComponentRef Id="ShellIndexHtml" />
+      <ComponentRef Id="CapabilitiesRegistration" />
     </Feature>
-
   </Package>
+
+  <Fragment>
+    <Component Id="MainExecutable" Directory="INSTALLFOLDER" Guid="A1B2C3D4-E5F6-4711-8111-111111111111">
+      <File
+          Id="TelShellExe"
+          Source="..\TceTelShell\bin\Release\net8.0-windows\win-x64\publish\TceTelShell.exe"
+          KeyPath="yes" />
+
+      <RegistryKey Root="HKLM" Key="Software\Classes\TceTelShell.tel" ForceCreateOnInstall="yes" ForceDeleteOnUninstall="yes">
+        <RegistryValue Type="string" Value="URL:TCE Tel Shell Protocol" />
+        <RegistryValue Name="URL Protocol" Type="string" Value="" />
+      </RegistryKey>
+
+      <RegistryKey Root="HKLM" Key="Software\Classes\TceTelShell.tel\DefaultIcon" ForceCreateOnInstall="yes" ForceDeleteOnUninstall="yes">
+        <RegistryValue Type="string" Value="[#TelShellExe],0" />
+      </RegistryKey>
+
+      <RegistryKey Root="HKLM" Key="Software\Classes\TceTelShell.tel\shell\open\command" ForceCreateOnInstall="yes" ForceDeleteOnUninstall="yes">
+        <RegistryValue Type="string" Value="&quot;[#TelShellExe]&quot; &quot;%1&quot;" />
+      </RegistryKey>
+    </Component>
+
+    <Component Id="WebView2LoaderComponent" Directory="INSTALLFOLDER" Guid="B2C3D4E5-F6A7-4822-8222-222222222222">
+      <File
+          Id="WebView2LoaderDll"
+          Source="..\TceTelShell\bin\Release\net8.0-windows\win-x64\publish\runtimes\win-x64\native\WebView2Loader.dll"
+          KeyPath="yes" />
+    </Component>
+
+    <Component Id="ShellIndexHtml" Directory="WWWROOTFOLDER" Guid="C3D4E5F6-A7B8-4933-8333-333333333333">
+      <File
+          Id="ShellIndexFile"
+          Source="..\TceTelShell\bin\Release\net8.0-windows\win-x64\publish\wwwroot\index.html"
+          KeyPath="yes" />
+    </Component>
+
+    <Component Id="CapabilitiesRegistration" Directory="INSTALLFOLDER" Guid="D4E5F6A7-B8C9-4A44-8444-444444444444">
+      <RegistryKey Root="HKLM" Key="Software\TCE Company\TCE Tel Shell\Capabilities" ForceCreateOnInstall="yes" ForceDeleteOnUninstall="yes">
+        <RegistryValue Name="ApplicationName" Type="string" Value="TCE Tel Shell" KeyPath="yes" />
+        <RegistryValue Name="ApplicationDescription" Type="string" Value="TCE Tel Shell protocol handler and dialer shell." />
+      </RegistryKey>
+
+      <RegistryKey Root="HKLM" Key="Software\TCE Company\TCE Tel Shell\Capabilities\URLAssociations" ForceCreateOnInstall="yes" ForceDeleteOnUninstall="yes">
+        <RegistryValue Name="tel" Type="string" Value="TceTelShell.tel" />
+      </RegistryKey>
+
+      <RegistryKey Root="HKLM" Key="Software\RegisteredApplications" ForceCreateOnInstall="yes" ForceDeleteOnUninstall="yes">
+        <RegistryValue Name="TCE Tel Shell" Type="string" Value="Software\TCE Company\TCE Tel Shell\Capabilities" />
+      </RegistryKey>
+    </Component>
+  </Fragment>
 </Wix>

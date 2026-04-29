@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Windows.Forms;
 
 namespace TceTelShell;
@@ -6,6 +6,7 @@ namespace TceTelShell;
 public class SettingsForm : Form
 {
     private readonly Label _titleLabel;
+    private readonly CheckBox _embeddedModeCheckBox;
     private readonly Label _urlLabel;
     private readonly TextBox _baseUrlTextBox;
     private readonly Label _pathLabel;
@@ -16,10 +17,10 @@ public class SettingsForm : Form
 
     public SettingsForm()
     {
-        Text = "TCE Tel Shell";
-        Width = 640;
-        Height = 260;
-        StartPosition = FormStartPosition.CenterScreen;
+        Text = "TCE Dialer Settings";
+        Width = 700;
+        Height = 320;
+        StartPosition = FormStartPosition.CenterParent;
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
 
@@ -27,32 +28,41 @@ public class SettingsForm : Form
         {
             Left = 20,
             Top = 20,
-            Width = 580,
-            Height = 30,
-            Text = "Configure the URL that should receive normalized tel: launches."
+            Width = 620,
+            Height = 36,
+            Text = "Stage 2 uses the embedded desktop shell with the real dialer page loaded in WebView2. Keep the browser URL for fallback or local Next.js development."
+        };
+
+        _embeddedModeCheckBox = new CheckBox
+        {
+            Left = 20,
+            Top = 60,
+            Width = 320,
+            Height = 24,
+            Text = "Use embedded desktop dialer shell"
         };
 
         _urlLabel = new Label
         {
             Left = 20,
-            Top = 60,
-            Width = 120,
+            Top = 96,
+            Width = 280,
             Height = 20,
-            Text = "Cloud PWA URL"
+            Text = "Embedded dialer / browser fallback URL"
         };
 
         _baseUrlTextBox = new TextBox
         {
             Left = 20,
-            Top = 85,
-            Width = 580,
+            Top = 121,
+            Width = 620,
             Height = 24
         };
 
         _pathLabel = new Label
         {
             Left = 20,
-            Top = 120,
+            Top = 156,
             Width = 120,
             Height = 20,
             Text = "Settings file"
@@ -61,8 +71,8 @@ public class SettingsForm : Form
         _settingsPathTextBox = new TextBox
         {
             Left = 20,
-            Top = 145,
-            Width = 580,
+            Top = 181,
+            Width = 620,
             Height = 24,
             ReadOnly = true
         };
@@ -70,7 +80,7 @@ public class SettingsForm : Form
         _saveButton = new Button
         {
             Left = 20,
-            Top = 185,
+            Top = 225,
             Width = 140,
             Height = 32,
             Text = "Save Settings"
@@ -79,16 +89,16 @@ public class SettingsForm : Form
         _testButton = new Button
         {
             Left = 175,
-            Top = 185,
-            Width = 160,
+            Top = 225,
+            Width = 220,
             Height = 32,
-            Text = "Open Configured URL"
+            Text = "Open Browser Fallback URL"
         };
 
         _defaultAppsButton = new Button
         {
-            Left = 350,
-            Top = 185,
+            Left = 410,
+            Top = 225,
             Width = 180,
             Height = 32,
             Text = "Open Default Apps"
@@ -99,6 +109,7 @@ public class SettingsForm : Form
         _defaultAppsButton.Click += OpenDefaultApps;
 
         Controls.Add(_titleLabel);
+        Controls.Add(_embeddedModeCheckBox);
         Controls.Add(_urlLabel);
         Controls.Add(_baseUrlTextBox);
         Controls.Add(_pathLabel);
@@ -113,6 +124,7 @@ public class SettingsForm : Form
     private void LoadSettings()
     {
         var settings = SettingsManager.Load();
+        _embeddedModeCheckBox.Checked = settings.UseEmbeddedDialer;
         _baseUrlTextBox.Text = settings.BaseUrl;
         _settingsPathTextBox.Text = SettingsManager.GetSettingsFilePath();
     }
@@ -121,11 +133,12 @@ public class SettingsForm : Form
     {
         var baseUrl = _baseUrlTextBox.Text.Trim();
 
-        if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var uri) ||
-            (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+        if (!string.IsNullOrWhiteSpace(baseUrl) &&
+            (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var uri) ||
+             (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)))
         {
             MessageBox.Show(
-                "Please enter a valid http:// or https:// URL.",
+                "Please enter a valid http:// or https:// URL for the dialer page.",
                 "Invalid URL",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning);
@@ -134,12 +147,13 @@ public class SettingsForm : Form
 
         SettingsManager.Save(new AppSettings
         {
-            BaseUrl = baseUrl
+            UseEmbeddedDialer = _embeddedModeCheckBox.Checked,
+            BaseUrl = string.IsNullOrWhiteSpace(baseUrl) ? "http://localhost:3000" : baseUrl
         });
 
         MessageBox.Show(
-            "Settings saved successfully.",
-            "TCE Tel Shell",
+            "Settings saved. Reload the shell or restart the app for navigation changes to take effect.",
+            "TCE Dialer",
             MessageBoxButtons.OK,
             MessageBoxIcon.Information);
     }
@@ -148,14 +162,13 @@ public class SettingsForm : Form
     {
         try
         {
-            SaveSettings(sender, e);
             PwaLauncher.OpenBaseUrl();
         }
         catch (Exception ex)
         {
             MessageBox.Show(
                 ex.Message,
-                "Launch Error",
+                "Unable to open browser fallback",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
         }
@@ -163,17 +176,6 @@ public class SettingsForm : Form
 
     private void OpenDefaultApps(object? sender, EventArgs e)
     {
-        try
-        {
-            DefaultAppsHelper.OpenDefaultApps();
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show(
-                ex.Message,
-                "Default Apps Error",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
-        }
+        DefaultAppsHelper.OpenDefaultApps();
     }
 }
