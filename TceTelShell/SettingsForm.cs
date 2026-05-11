@@ -148,7 +148,7 @@ public class SettingsForm : Form
         SettingsManager.Save(new AppSettings
         {
             UseEmbeddedDialer = _embeddedModeCheckBox.Checked,
-            BaseUrl = string.IsNullOrWhiteSpace(baseUrl) ? "http://localhost:3000" : baseUrl
+            BaseUrl = string.IsNullOrWhiteSpace(baseUrl) ? "https://dialer.tcevoiceiq.com/" : baseUrl
         });
 
         MessageBox.Show(
